@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Film;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class FilmController extends Controller
@@ -36,7 +37,17 @@ class FilmController extends Controller
     /** POST /api/films */
     public function store(Request $request): JsonResponse
     {
-        $film = Film::create($request->validate($this->rules()));
+        $validated = $request->validate($this->rules());
+        $film = Film::create($validated);
+
+        Log::info('Film created', [
+            'event' => 'film.created',
+            'actor_id' => $request->user()?->id,
+            'action' => 'create film',
+            'film_id' => $film->id,
+            'fields' => array_keys($validated),
+            'reason' => 'valid film data submitted',
+        ]);
 
         return response()->json($film, 201);
     }
@@ -50,7 +61,17 @@ class FilmController extends Controller
     /** PUT/PATCH /api/films/{film} */
     public function update(Request $request, Film $film): JsonResponse
     {
-        $film->update($request->validate($this->rules()));
+        $validated = $request->validate($this->rules());
+        $film->update($validated);
+
+        Log::info('Film updated', [
+            'event' => 'film.updated',
+            'actor_id' => $request->user()?->id,
+            'action' => 'update film',
+            'film_id' => $film->id,
+            'fields' => array_keys($validated),
+            'reason' => 'valid film changes submitted',
+        ]);
 
         return response()->json($film);
     }
@@ -58,7 +79,16 @@ class FilmController extends Controller
     /** DELETE /api/films/{film} */
     public function destroy(Film $film): JsonResponse
     {
+        $filmId = $film->id;
         $film->delete();
+
+        Log::info('Film deleted', [
+            'event' => 'film.deleted',
+            'actor_id' => request()->user()?->id,
+            'action' => 'delete film',
+            'film_id' => $filmId,
+            'reason' => 'user requested deletion',
+        ]);
 
         return response()->json(['message' => 'Film berhasil dihapus.']);
     }

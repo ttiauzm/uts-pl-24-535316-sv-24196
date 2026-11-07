@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -26,6 +27,15 @@ class AuthController extends Controller
         ]);
 
         $user = User::create($validated);
+
+        Log::info('User registered', [
+            'event' => 'auth.user_registered',
+            'actor_id' => $request->user()?->id,
+            'target_user_id' => $user->id,
+            'action' => 'register user',
+            'reason' => 'authenticated user created a new account',
+        ]);
+
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
@@ -47,10 +57,24 @@ class AuthController extends Controller
         $user = User::where('email', $validated['email'])->first();
 
         if (! $user || ! Hash::check($validated['password'], $user->password)) {
+            Log::warning('Login failed', [
+                'event' => 'auth.login_failed',
+                'actor_id' => $user?->id,
+                'action' => 'login',
+                'reason' => 'invalid credentials',
+            ]);
+
             return response()->json(['message' => 'Email atau password salah.'], 401);
         }
 
         $token = $user->createToken('api-token')->plainTextToken;
+
+        Log::info('Login succeeded', [
+            'event' => 'auth.login_succeeded',
+            'actor_id' => $user->id,
+            'action' => 'login',
+            'reason' => 'valid credentials',
+        ]);
 
         return response()->json([
             'message' => 'Login berhasil.',
@@ -70,6 +94,13 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
+
+        Log::info('Logout succeeded', [
+            'event' => 'auth.logout_succeeded',
+            'actor_id' => $request->user()->id,
+            'action' => 'logout',
+            'reason' => 'user requested token revocation',
+        ]);
 
         return response()->json(['message' => 'Logout berhasil.']);
     }

@@ -26,7 +26,8 @@ WORKDIR /app
 
 ENV APP_ENV=production \
     APP_DEBUG=false \
-    LOG_CHANNEL=stderr \
+    LOG_CHANNEL=stdout \
+    LOG_LEVEL=info \
     SESSION_DRIVER=file \
     CACHE_STORE=file \
     QUEUE_CONNECTION=sync
@@ -49,8 +50,8 @@ USER www-data
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=40s --retries=5 \
-    CMD wget -qO- http://127.0.0.1:8000/up > /dev/null || exit 1
+HEALTHCHECK --interval=10s --timeout=5s --start-period=40s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:8000/health > /dev/null || exit 1
 
 ENTRYPOINT ["entrypoint"]
 CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

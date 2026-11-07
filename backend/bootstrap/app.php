@@ -1,10 +1,15 @@
 <?php
 
+use App\Http\Controllers\HealthController;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            // Endpoint operasional di root (tanpa middleware session/web).
+            Route::get('/health', HealthController::class);
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Project ini tidak punya halaman web login: untuk /api/* jangan redirect (null),
@@ -29,6 +38,38 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+        });
+
+        // Validasi gagal: catat siapa, endpoint apa, dan field mana yang salah.
+        // Nilai input (termasuk password) tidak pernah dimasukkan ke context.
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                $sensitiveFields = ['email', 'password', 'password_confirmation', 'token', 'access_token'];
+
+                Log::warning('Request validation failed', [
+                    'event' => 'request.validation_failed',
+                    'actor_id' => $request->user()?->id,
+                    'action' => $request->method().' '.$request->path(),
+                    'reason' => 'invalid request payload',
+                    'field_count' => count($e->errors()),
+                    'fields' => array_values(array_diff(array_keys($e->errors()), $sensitiveFields)),
+                ]);
+            }
+        });
+
+        // Kegagalan query/koneksi database juga dicatat tanpa membocorkan SQL
+        // atau nilai data yang mungkin sensitif.
+        $exceptions->render(function (QueryException $e, Request $request) {
+            if ($request->is('api/*')) {
+                Log::error('Database operation failed', [
+                    'event' => 'database.operation_failed',
+                    'actor_id' => $request->user()?->id,
+                    'action' => $request->method().' '.$request->path(),
+                    'reason' => 'database query failed',
+                    'error_class' => $e::class,
+                    'sql_state' => $e->errorInfo[0] ?? null,
+                ]);
             }
         });
     })->create();
