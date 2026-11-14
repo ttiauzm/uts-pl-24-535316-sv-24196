@@ -1,0 +1,14 @@
+groups:
+  - name: letterbox-ketersediaan
+    rules:
+      - alert: LayananMati
+        # up bernilai 0 jika Prometheus gagal mengambil metrik dari target.
+        expr: up == 0
+        # Tunggu 1 menit agar gangguan sesaat (mis. restart) tidak membunyikan alarm.
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Layanan {{ $labels.job }} mati"
+          description: "Target {{ $labels.instance }} (job {{ $labels.job }}) tidak bisa di-scrape lebih dari 1 menit."
+          tindakan_pertama: "Jalankan `docker compose ps {{ $labels.job }}` untuk melihat statusnya, lalu `docker compose logs --tail=50 {{ $labels.job }}` untuk mencari penyebab. Jika container berhenti, nyalakan kembali dengan `docker compose up -d {{ $labels.job }}`."

@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+# Nama job SAMA dengan nama service di docker-compose.yml,
+# sehingga anotasi alarm bisa memakai {{ $labels.job }} sebagai nama service.
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+
+  - job_name: node-exporter
+    static_configs:
+      - targets: ["node-exporter:9100"]
+
+  - job_name: grafana
+    static_configs:
+      - targets: ["grafana:3000"]
+
+  # Aplikasi Letterbox: metrik HTTP dari Caddy/FrankenPHP (listener internal :9180)
+  - job_name: backend
+    static_configs:
+      - targets: ["backend:9180"]
