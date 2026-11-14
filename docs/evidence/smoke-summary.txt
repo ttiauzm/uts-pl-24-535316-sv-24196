@@ -1,5 +1,5 @@
 # Ringkasan hasil scripts/compose-smoke.sh
-# https://github.com/ttiauzm/uts-pi-24-535316-sv-24196/actions/runs/40059764556
+# https://github.com/ttiauzm/uts-pl-24-535316-sv-24196/actions/runs/40059764556
 
 == 1. Build dan jalankan seluruh sistem ==
 Semua service sehat setelah 2 percobaan.

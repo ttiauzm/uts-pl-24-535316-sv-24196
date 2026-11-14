@@ -1,5 +1,5 @@
 # Potongan log container backend (FrankenPHP) dari Compose Smoke Test
-# https://github.com/ttiauzm/uts-pi-24-535316-sv-24196/actions/runs/40059764556
+# https://github.com/ttiauzm/uts-pl-24-535316-sv-24196/actions/runs/40059764556
 
 backend-1  | {"level":"info","ts":1792813748.8262331,"msg":"using config from file","file":"/etc/caddy/Caddyfile"}
 backend-1  | {"level":"info","ts":1792813748.8432057,"logger":"frankenphp","msg":"FrankenPHP started","php_version":"8.3.36","total_threads":8,"worker_threads":0,"max_threads":8,"max_requests":0}
