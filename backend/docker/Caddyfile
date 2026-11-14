@@ -1,19 +1,20 @@
 {
-	admin off
-	auto_https off
-	frankenphp
+    frankenphp
+    order frankenphp_server before file_server
+    
+    # Ini akan mengekspos metrics di localhost:2019 secara default
+    servers {
+        metrics
+    }
 }
 
 :8000 {
-	root * /app/public
-	encode zstd gzip
+    root * public
+    encode zstd gzip
+    
+    # Matikan auto-HTTPS agar healthcheck HTTP biasa berhasil
+    tls internal
 
-	# Access log ke stderr -> terbaca lewat `docker compose logs backend`.
-	# Ini juga menjadi bukti bahwa permintaan API dilayani FrankenPHP.
-	log {
-		output stderr
-		format console
-	}
-
-	php_server
+    frankenphp_server
+    file_server
 }

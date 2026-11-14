@@ -24,7 +24,6 @@ scrape_configs:
     static_configs:
       - targets: ["grafana:3000"]
 
-  # Aplikasi Letterbox: metrik HTTP dari Caddy/FrankenPHP (listener internal :9180)
   - job_name: backend
     static_configs:
-      - targets: ["backend:9180"]
+      - targets: ["backend:2019"]
