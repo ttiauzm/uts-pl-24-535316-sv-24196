@@ -6,8 +6,6 @@
 **Mata kuliah:** Konstruksi dan Evolusi Perangkat Lunak (UTS)
 
 **Repository:** <https://github.com/ttiauzm/uts-pl-24-535316-sv-24196>
-**Laporan UTS:** [`docs/laporan.md`](docs/laporan.md)
-**Laporan P10:** [`docs/laporan-p10.md`](docs/laporan-p10.md)
 
 Letterbox adalah aplikasi buku catatan tontonan: menyimpan film yang **ingin ditonton**,
 **sedang ditonton**, atau **sudah ditonton**, lengkap dengan sutradara, tahun, rating, dan
@@ -40,7 +38,6 @@ ulasan singkat. Tema ini berbeda dari tugas sebelumnya (CRUD catatan/notes).
 │   └── .dockerignore
 ├── postman/letterbox-api.postman_collection.json
 ├── scripts/compose-smoke.sh  # smoke test Compose (CRUD + persistensi)
-├── docs/{laporan.md,laporan-p10.md,github-setup.md,checklist-bukti.md,bukti-p10/,rulesets/}
 ├── .github/workflows/{ci.yml,compose-smoke.yml}
 ├── docker-compose.yml
 ├── .env.example
@@ -305,9 +302,6 @@ Semua perubahan masuk lewat Pull Request. Pasang ruleset/branch protection pada 
 - Require status checks to pass: `Backend (Laravel test)` dan `Frontend (npm ci + build)`
 - Block force pushes
 - Restrict deletions
-
-Langkah rinci (termasuk contoh payload API ruleset) ada di
-[`docs/github-setup.md`](docs/github-setup.md).
 
 ## FrankenPHP
 
