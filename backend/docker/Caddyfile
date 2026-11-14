@@ -1,20 +1,33 @@
 {
-    frankenphp
-    order frankenphp_server before file_server
-    
-    # Ini akan mengekspos metrics di localhost:2019 secara default
-    servers {
-        metrics
-    }
+	admin off
+	auto_https off
+	frankenphp
+
+	# P11: aktifkan metrik HTTP (caddy_http_requests_total, dst.)
+	metrics
+
+	# Beri nama server API agar bisa difilter di PromQL: server="api"
+	servers :8000 {
+		name api
+	}
 }
 
 :8000 {
-    root * public
-    encode zstd gzip
-    
-    # Matikan auto-HTTPS agar healthcheck HTTP biasa berhasil
-    tls internal
+	root * /app/public
+	encode zstd gzip
 
-    frankenphp_server
-    file_server
+	# Access log ke stderr -> terbaca lewat `docker compose logs backend`.
+	# Ini juga menjadi bukti bahwa permintaan API dilayani FrankenPHP.
+	log {
+		output stderr
+		format console
+	}
+
+	php_server
+}
+
+# P11: endpoint metrik Prometheus. Port 9180 TIDAK dipublikasikan ke host
+# (hanya terjangkau di jaringan app-net), jadi tidak terbuka ke publik.
+:9180 {
+	metrics /metrics
 }
